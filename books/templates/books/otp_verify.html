@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify OTP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent 40%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                transparent 60%);
+            animation: shine 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        h2 {
+            color: #4a5568;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        form {
+            position: relative;
+            z-index: 1;
+        }
+
+        .input-container {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .hidden-input {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+
+        .otp-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .digit-box {
+            width: 60px;
+            height: 70px;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            color: #4a5568;
+            background: #f7fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .digit-box.active {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: scale(1.05);
+        }
+
+        .digit-box.filled {
+            border-color: #48bb78;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            animation: fillPop 0.3s ease;
+        }
+
+        @keyframes fillPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .digit-box::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .digit-box.filled::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .fun-facts {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            color: #ffd700;
+            animation: twinkle 2s infinite;
+        }
+
+        .star:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .star:nth-child(2) { top: 20%; right: 15%; animation-delay: 0.5s; }
+        .star:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 1s; }
+        .star:nth-child(4) { bottom: 15%; right: 10%; animation-delay: 1.5s; }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            h2 {
+                font-size: 1.8em;
+            }
+            
+            input[type="text"] {
+                font-size: 1.5em;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="stars">
+            <div class="star">⭐</div>
+            <div class="star">✨</div>
+            <div class="star">🌟</div>
+            <div class="star">💫</div>
+        </div>
+        
+        <div class="emoji">🔐</div>
+        <h2>Secret Code Time!</h2>
+        <p class="subtitle">Check your email for the magic 6-digit code</p>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error-message">
+                    Oops! {{ message }} Try again! 🤔
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="input-container">
+                <input type="text" name="otp" class="hidden-input" required maxlength="6" pattern="[0-9]{6}" autocomplete="off">
+                <div class="otp-boxes">
+                    <div class="digit-box" data-index="0"></div>
+                    <div class="digit-box" data-index="1"></div>
+                    <div class="digit-box" data-index="2"></div>
+                    <div class="digit-box" data-index="3"></div>
+                    <div class="digit-box" data-index="4"></div>
+                    <div class="digit-box" data-index="5"></div>
+                </div>
+            </div>
+            <button type="submit">🚀 Verify My Code!</button>
+        </form>
+
+        <div class="fun-facts">
+            💡 Fun Fact: Your code is like a secret password that only you know!
+        </div>
+    </div>
+
+    <script>
+        const input = document.querySelector('input[name="otp"]');
+        const digitBoxes = document.querySelectorAll('.digit-box');
+        let currentIndex = 0;
+
+        // Focus the hidden input on page load
+        input.focus();
+
+        // Click on any box to focus
+        digitBoxes.forEach((box, index) => {
+            box.addEventListener('click', () => {
+                input.focus();
+                currentIndex = index;
+                updateActiveBox();
+            });
+        });
+
+        function updateActiveBox() {
+            digitBoxes.forEach((box, index) => {
+                box.classList.remove('active');
+                if (index === currentIndex) {
+                    box.classList.add('active');
+                }
+            });
+        }
+
+        input.addEventListener('input', function(e) {
+            const value = e.target.value;
+            
+            // Update digit boxes to show entered numbers
+            digitBoxes.forEach((box, index) => {
+                if (value[index]) {
+                    box.textContent = value[index];
+                    box.classList.add('filled');
+                    box.classList.remove('active');
+                } else {
+                    box.textContent = '';
+                    box.classList.remove('filled');
+                }
+            });
+
+            // Update current index
+            currentIndex = value.length;
+            updateActiveBox();
+        });
+
+        input.addEventListener('keydown', function(e) {
+            const value = e.target.value;
+            
+            if (e.key === 'Backspace' && value.length > 0) {
+                currentIndex = Math.max(0, value.length - 1);
+                setTimeout(updateActiveBox, 10);
+            }
+        });
+
+        // Only allow numbers
+        input.addEventListener('keypress', function(e) {
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+
+        // Auto-submit when 6 digits are entered
+        input.addEventListener('input', function(e) {
+            if (e.target.value.length === 6) {
+                setTimeout(() => {
+                    e.target.form.submit();
+                }, 800);
+            }
+        });
+
+        // Keep focus on hidden input
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.container')) {
+                input.focus();
+            }
+        });
+
+        // Initialize
+        updateActiveBox();
+    </script>
+</body>
+</html>

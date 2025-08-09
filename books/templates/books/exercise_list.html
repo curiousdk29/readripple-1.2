@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Exercises</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .exercise-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .exercise-card:nth-child(even) {
+            animation-delay: 0.1s;
+        }
+
+        .exercise-card:nth-child(odd) {
+            animation-delay: 0.2s;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .exercise-title {
+            color: #4a5568;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+        }
+
+        .delete-btn:active {
+            transform: translateY(0);
+        }
+
+        .exercise-content {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            color: #2d3748;
+            border-left: 4px solid #667eea;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exercise-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        /* Text highlighting styles */
+        .word {
+            transition: all 0.3s ease;
+            padding: 2px 4px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .word.highlight {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #2d3748;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+            transform: scale(1.05);
+        }
+
+        .word.reading {
+            background: linear-gradient(135deg, #4299e1, #63b3ed);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(66, 153, 225, 0.4);
+            animation: readingPulse 1s ease-in-out;
+        }
+
+        @keyframes readingPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .speed-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .speed-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        .speed-btn {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        .speed-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+        }
+
+        .speed-btn.slow {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .speed-btn.slow:hover {
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .speed-btn.fast {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
+        }
+
+        .speed-btn.fast:hover {
+            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
+        }
+
+        .speed-indicator {
+            background: linear-gradient(135deg, #805ad5, #6b46c1);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 50px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(128, 90, 213, 0.3);
+        }
+
+        .speak-btn {
+            background: linear-gradient(135deg, #38b2ac, #319795);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(56, 178, 172, 0.3);
+            align-self: flex-start;
+        }
+
+        .speak-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(56, 178, 172, 0.4);
+            background: linear-gradient(135deg, #319795, #2c7a7b);
+        }
+
+        .speak-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .speak-btn.speaking {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(245, 101, 101, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(245, 101, 101, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 101, 101, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .exercise-card {
+                padding: 20px;
+            }
+
+            .exercise-title {
+                font-size: 1.5rem;
+            }
+
+            .exercise-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .speed-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .speak-btn {
+                align-self: stretch;
+                text-align: center;
+            }
+        }
+
+        .no-exercises {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 3rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Reading Exercises</h1>
+        
+        {% for exercise in exercises %}
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <h2 class="exercise-title">{{ exercise.title }}</h2>
+                {% if user.is_staff %}
+                <form action="{% url 'delete_exercise' exercise.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this exercise?')">
+                        🗑️ Delete
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            
+            <div class="exercise-content" id="text-{{ exercise.id }}">
+                {{ exercise.content }}
+            </div>
+            
+            <div class="controls-section">
+                <div class="speed-controls">
+                    <span class="speed-label">🎚️ Speed:</span>
+                    <button class="speed-btn slow" onclick="setSpeed({{ exercise.id }}, 0.8)">
+                        🟢 Slow
+                    </button>
+                    <button class="speed-btn" onclick="setSpeed({{ exercise.id }}, 1)">
+                        🔵 Normal
+                    </button>
+                    <button class="speed-btn fast" onclick="setSpeed({{ exercise.id }}, 1.3)">
+                        🟠 Fast
+                    </button>
+                    <span class="speed-indicator" id="speed-label-{{ exercise.id }}">1x</span>
+                </div>
+                
+                <button class="speak-btn" id="speak-btn-{{ exercise.id }}" onclick="speak({{ exercise.id }})">
+                    🔊 Read Aloud
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-exercises">
+            No reading exercises available at the moment.
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Keep track of speed per exercise and highlighting
+        const speechSpeeds = {};
+        let currentSpeech = null;
+        let currentExerciseId = null;
+        let highlightInterval = null;
+        let originalTexts = {};
+
+        function setSpeed(id, speed) {
+            speechSpeeds[id] = speed;
+            const label = document.getElementById(`speed-label-${id}`);
+            label.innerText = speed + 'x';
+            
+            // Add a subtle animation to show the change
+            label.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                label.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        function prepareTextForHighlighting(id) {
+            const textElement = document.getElementById(`text-${id}`);
+            
+            // Store original text if not already stored
+            if (!originalTexts[id]) {
+                originalTexts[id] = textElement.innerHTML;
+            }
+            
+            const originalText = textElement.innerText;
+            const words = originalText.split(/(\s+)/);
+            
+            // Clear existing content and rebuild with spans
+            textElement.innerHTML = '';
+            
+            let wordIndex = 0;
+            words.forEach((word) => {
+                if (word.trim()) {
+                    const span = document.createElement('span');
+                    span.className = 'word';
+                    span.setAttribute('data-word', wordIndex);
+                    span.textContent = word;
+                    textElement.appendChild(span);
+                    wordIndex++;
+                } else {
+                    // Preserve whitespace
+                    textElement.appendChild(document.createTextNode(word));
+                }
+            });
+            
+            return words.filter(word => word.trim());
+        }
+
+        function highlightWord(exerciseId, wordIndex) {
+            // Remove previous highlights
+            const allWords = document.querySelectorAll(`#text-${exerciseId} .word`);
+            allWords.forEach(word => {
+                word.classList.remove('highlight', 'reading');
+            });
+            
+            // Highlight current word
+            const currentWord = document.querySelector(`#text-${exerciseId} .word[data-word="${wordIndex}"]`);
+            if (currentWord) {
+                currentWord.classList.add('reading');
+                
+                // Scroll into view if needed
+                currentWord.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                    inline: 'nearest'
+                });
+            }
+        }
+
+      function speak(id) {
+    const textElement = document.getElementById(`text-${id}`);
+    const speed = speechSpeeds[id] || 1;
+    const speakBtn = document.getElementById(`speak-btn-${id}`);
+    
+    // Stop any ongoing speech
+    if (currentSpeech) {
+        speechSynthesis.cancel();
+        clearInterval(highlightInterval);
+        resetAllButtons();
+    }
+    
+    // If clicking the same button that's currently speaking, just stop
+    if (currentExerciseId === id && speakBtn.classList.contains('speaking')) {
+        return;
+    }
+    
+    // Prepare text for highlighting
+    const words = prepareTextForHighlighting(id);
+    const fullText = words.join(' ');
+    
+    const msg = new SpeechSynthesisUtterance(fullText);
+    msg.rate = speed;
+    
+    // Update button state
+    speakBtn.classList.add('speaking');
+    speakBtn.innerHTML = '⏹️ Stop Reading';
+    currentSpeech = msg;
+    currentExerciseId = id;
+    
+    // SOLUTION 1: Use boundary events for perfect sync (if supported)
+    let currentWordIndex = 0;
+    
+    // Try to use boundary events for precise timing
+    if ('onboundary' in msg) {
+        msg.onboundary = function(event) {
+            if (event.name === 'word' && currentWordIndex < words.length) {
+                highlightWord(id, currentWordIndex);
+                currentWordIndex++;
+            }
+        };
+    } else {
+        // SOLUTION 2: Fallback with adaptive timing
+        let speechStartTime = null;
+        let highlightStartTime = null;
+        
+        msg.onstart = function() {
+            speechStartTime = Date.now();
+            highlightStartTime = Date.now();
+            currentWordIndex = 0;
+            
+            // Start highlighting immediately when speech starts
+            highlightWord(id, 0);
+            currentWordIndex = 1;
+            
+            // Use adaptive timing based on actual speech progress
+            highlightInterval = setInterval(() => {
+                if (currentWordIndex < words.length && currentSpeech) {
+                    const elapsedTime = Date.now() - highlightStartTime;
+                    const expectedWordIndex = Math.floor((elapsedTime / 1000) * (speed * 2.5)); // Adjusted multiplier
+                    
+                    if (expectedWordIndex >= currentWordIndex) {
+                        highlightWord(id, currentWordIndex);
+                        currentWordIndex++;
+                    }
+                } else {
+                    clearInterval(highlightInterval);
+                }
+            }, 50); // Check every 50ms for smoother sync
+        };
+    }
+    
+    // Handle speech end
+    msg.onend = function() {
+        clearInterval(highlightInterval);
+        resetAllButtons();
+        clearHighlights(id);
+    };
+    
+    msg.onerror = function() {
+        clearInterval(highlightInterval);
+        resetAllButtons();
+        clearHighlights(id);
+    };
+    
+    speechSynthesis.speak(msg);
+}
+
+
+
+        function clearHighlights(exerciseId) {
+            const allWords = document.querySelectorAll(`#text-${exerciseId} .word`);
+            allWords.forEach(word => {
+                word.classList.remove('highlight', 'reading');
+            });
+            
+            // Restore original text structure
+            if (originalTexts[exerciseId]) {
+                const textElement = document.getElementById(`text-${exerciseId}`);
+                textElement.innerHTML = originalTexts[exerciseId];
+            }
+        }
+
+        function resetAllButtons() {
+            const allSpeakBtns = document.querySelectorAll('.speak-btn');
+            allSpeakBtns.forEach(btn => {
+                btn.classList.remove('speaking');
+                btn.innerHTML = '🔊 Read Aloud';
+            });
+            
+            // Clear highlights from all exercises
+            if (currentExerciseId) {
+                clearHighlights(currentExerciseId);
+            }
+            
+            currentSpeech = null;
+            currentExerciseId = null;
+        }
+
+        // Handle page visibility change to stop speech when tab is hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && currentSpeech) {
+                speechSynthesis.cancel();
+                clearInterval(highlightInterval);
+                resetAllButtons();
+            }
+        });
+
+        // Add smooth scrolling for better UX
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.exercise-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

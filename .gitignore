@@ -1,0 +1,4 @@
+# .gitignore
+
+# Ignore the environment file that stores secrets
+.env

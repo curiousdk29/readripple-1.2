@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ book.title }}</title>
+</head>
+<body>
+    <h2>{{ book.title }}</h2>
+    <p><strong>Age Group:</strong> {{ book.age_group }}</p>
+    <p><strong>Level:</strong> {{ book.level }}</p>
+    <p>{{ book.description }}</p>
+    <a href="{{ book.file.url }}" download>Download Book</a>
+    <br><br>
+    <a href="{% url 'browse_books' %}">Back to Browse</a>
+</body>
+</html>

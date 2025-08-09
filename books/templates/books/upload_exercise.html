@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Reading Exercise</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input[type="text"]:focus + .focus-border,
+        textarea:focus + .focus-border {
+            transform: scaleX(1);
+        }
+
+        .focus-border {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        textarea {
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .char-counter.warning {
+            color: #ed8936;
+        }
+
+        .char-counter.danger {
+            color: #e53e3e;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #38b2ac, #319795);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(56, 178, 172, 0.3);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(56, 178, 172, 0.4);
+            background: linear-gradient(135deg, #319795, #2c7a7b);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-btn .loading {
+            display: none;
+        }
+
+        .submit-btn.submitting .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        .submit-btn.submitting .text {
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(-5px);
+            color: #5a67d8;
+        }
+
+        .preview-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .preview-section.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .preview-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .preview-content {
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        .form-validation {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .form-validation.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            border-left: 4px solid #38a169;
+            text-align: center;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                max-height: 200px;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            input[type="text"], textarea {
+                padding: 12px 15px;
+            }
+
+            .submit-btn {
+                padding: 12px 30px;
+                font-size: 1.1rem;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #2d3748;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Upload Reading Exercise</h1>
+
+        <div class="form-validation" id="validation-message"></div>
+        <div class="success-message" id="success-message">
+            ✅ Exercise uploaded successfully! Redirecting...
+        </div>
+
+        <form method="POST" id="upload-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="title" class="tooltip">
+                    📚 Exercise Title
+                    <span class="tooltiptext">Give your exercise a clear, descriptive title</span>
+                </label>
+                <input type="text" name="title" id="title" required maxlength="100" 
+                       placeholder="Enter exercise title...">
+                <div class="focus-border"></div>
+                <div class="char-counter" id="title-counter">0/100 characters</div>
+            </div>
+
+            <div class="form-group">
+                <label for="content" class="tooltip">
+                    📄 Exercise Content
+                    <span class="tooltiptext">Write or paste the reading material here</span>
+                </label>
+                <textarea name="content" id="content" rows="8" required minlength="50" 
+                          placeholder="Enter the reading exercise content here..."></textarea>
+                <div class="focus-border"></div>
+                <div class="char-counter" id="content-counter">0 characters (minimum 50)</div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                <span class="text">🚀 Upload Exercise</span>
+                <span class="loading">⏳</span>
+            </button>
+        </form>
+
+        <div class="preview-section" id="preview-section">
+            <h3 class="preview-title" id="preview-title">Preview</h3>
+            <div class="preview-content" id="preview-content"></div>
+        </div>
+
+        <a href="{% url 'exercise_list' %}" class="back-link">
+            ⬅️ Back to Exercise List
+        </a>
+    </div>
+
+    <script>
+        const titleInput = document.getElementById('title');
+        const contentInput = document.getElementById('content');
+        const titleCounter = document.getElementById('title-counter');
+        const contentCounter = document.getElementById('content-counter');
+        const submitBtn = document.getElementById('submit-btn');
+        const form = document.getElementById('upload-form');
+        const previewSection = document.getElementById('preview-section');
+        const previewTitle = document.getElementById('preview-title');
+        const previewContent = document.getElementById('preview-content');
+        const validationMessage = document.getElementById('validation-message');
+        const successMessage = document.getElementById('success-message');
+
+        // Character counting and validation
+        function updateCharCounter(input, counter, max = null, min = null) {
+            const length = input.value.length;
+            
+            if (max) {
+                counter.textContent = `${length}/${max} characters`;
+                if (length > max * 0.8) {
+                    counter.classList.add('warning');
+                }
+                if (length > max * 0.95) {
+                    counter.classList.add('danger');
+                    counter.classList.remove('warning');
+                }
+                if (length <= max * 0.8) {
+                    counter.classList.remove('warning', 'danger');
+                }
+            } else if (min) {
+                counter.textContent = `${length} characters (minimum ${min})`;
+                if (length < min) {
+                    counter.classList.add('warning');
+                } else {
+                    counter.classList.remove('warning');
+                }
+            }
+        }
+
+        // Real-time validation
+        function validateForm() {
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+            
+            let isValid = true;
+            let errors = [];
+
+            if (title.length === 0) {
+                errors.push('Title is required');
+                isValid = false;
+            } else if (title.length > 100) {
+                errors.push('Title must be less than 100 characters');
+                isValid = false;
+            }
+
+            if (content.length === 0) {
+                errors.push('Content is required');
+                isValid = false;
+            } else if (content.length < 50) {
+                errors.push('Content must be at least 50 characters long');
+                isValid = false;
+            }
+
+            // Show/hide validation errors
+            if (errors.length > 0 && (title.length > 0 || content.length > 0)) {
+                validationMessage.innerHTML = errors.join('<br>');
+                validationMessage.classList.add('show');
+            } else {
+                validationMessage.classList.remove('show');
+            }
+
+            submitBtn.disabled = !isValid;
+            return isValid;
+        }
+
+        // Live preview functionality
+        function updatePreview() {
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+
+            if (title || content) {
+                previewTitle.textContent = title || 'Untitled Exercise';
+                previewContent.textContent = content || 'No content yet...';
+                previewSection.classList.add('show');
+            } else {
+                previewSection.classList.remove('show');
+            }
+        }
+
+        // Event listeners
+        titleInput.addEventListener('input', function() {
+            updateCharCounter(this, titleCounter, 100);
+            validateForm();
+            updatePreview();
+        });
+
+        contentInput.addEventListener('input', function() {
+            updateCharCounter(this, contentCounter, null, 50);
+            validateForm();
+            updatePreview();
+        });
+
+        // Auto-resize textarea
+        contentInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Form submission with loading state
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                return;
+            }
+
+            submitBtn.classList.add('submitting');
+            submitBtn.disabled = true;
+
+            // Simulate form processing (remove this in production)
+            // The actual form will be handled by Django
+            setTimeout(() => {
+                successMessage.classList.add('show');
+                setTimeout(() => {
+                    // Form will redirect naturally in Django
+                }, 1500);
+            }, 1000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to submit
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                if (validateForm()) {
+                    form.submit();
+                }
+            }
+            
+            // Escape to clear form
+            if (e.key === 'Escape') {
+                if (confirm('Clear the form?')) {
+                    form.reset();
+                    updateCharCounter(titleInput, titleCounter, 100);
+                    updateCharCounter(contentInput, contentCounter, null, 50);
+                    validateForm();
+                    updatePreview();
+                }
+            }
+        });
+
+        // Initialize
+        validateForm();
+        
+        // Add smooth focus transitions
+        const inputs = document.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.querySelector('label').style.color = '#667eea';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.querySelector('label').style.color = '#4a5568';
+            });
+        });
+
+        // Add typing animation effect
+        let typingTimer;
+        contentInput.addEventListener('input', function() {
+            this.style.borderColor = '#48bb78';
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                this.style.borderColor = '#e2e8f0';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
